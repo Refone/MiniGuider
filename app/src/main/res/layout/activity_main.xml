@@ -10,10 +10,39 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ipads.miniguider.MainActivity">
 
-    <Button
-        android:text="路径规划"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:onClick="onClickRoute"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="路径规划"
+                android:onClick="onClickRoute"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+             <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="公交线路查询"
+                android:onClick="onBusQuery"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
 
 </RelativeLayout>

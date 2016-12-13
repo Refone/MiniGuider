@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_route_plan_demo"
+    android:id="@+id/activity_bus_line_demo"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.ipads.miniguider.RoutePlanDemo">
+    tools:context="com.ipads.miniguider.BusLineDemo">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
@@ -48,88 +48,28 @@
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="起点：" />
+                android:text="查询线路：" />
 
             <AutoCompleteTextView
-                android:id="@+id/start"
-                android:layout_width="fill_parent"
+                android:id="@+id/route"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:text="上海交通大学（闵行校区）" >
+                android:text="23" >
 
                 <requestFocus />
             </AutoCompleteTextView>
-        </LinearLayout>
 
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/textView2"
+            <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="终点：" />
+                android:text="查询"
+                android:onClick="searchButtonProcess"/>
 
-            <AutoCompleteTextView
-                android:id="@+id/end"
-                android:layout_width="fill_parent"
+            <Button
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:text="上海交通大学（徐汇校区）" >
-
-                <requestFocus />
-            </AutoCompleteTextView>
-        </LinearLayout>
-
-        <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dip"
-            android:layout_marginTop="5dip"
-            android:orientation="horizontal" >
-
-            <Button
-                android:id="@+id/drive"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:onClick="searchButtonProcess"
-                android:text="驾车搜索" />
-
-            <Button
-                android:id="@+id/transit"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:onClick="searchButtonProcess"
-                android:text="公交搜索" />
-
-            <Button
-                android:id="@+id/walk"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:onClick="searchButtonProcess"
-                android:text="步行搜索" />
-            <!--Button
-                android:id="@+id/bike"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_marginLeft="2dip"
-                android:layout_marginRight="2dip"
-                android:layout_weight="1.0"
-                android:onClick="searchButtonProcess"
-                android:text="骑行搜索" /-->
+                android:text="收藏"/>
         </LinearLayout>
 
         <RelativeLayout
@@ -138,31 +78,11 @@
             android:layout_height="match_parent" >
 
             <com.baidu.mapapi.map.MapView
-                android:id="@+id/map"
+                android:id="@+id/bmapView"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                class="com.baidu.mapapi.map.SupportMapFragment"
                 android:clickable="true" />
-
-            <LinearLayout
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignWithParentIfMissing="false"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="10dip"
-                android:orientation="vertical" >
-
-                <Button
-                    android:id="@+id/customicon"
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_marginTop="10dip"
-                    android:layout_weight="1.0"
-                    android:onClick="changeTrafficEnable"
-                    android:text="开启实时路况" />
-            </LinearLayout>
 
             <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
@@ -197,5 +117,4 @@
         </RelativeLayout>
 
     </LinearLayout>
-
 </RelativeLayout>

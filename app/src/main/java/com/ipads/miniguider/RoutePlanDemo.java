@@ -3,7 +3,11 @@ package com.ipads.miniguider;
 import android.app.Activity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -45,9 +49,16 @@ import com.baidu.mapapi.search.route.TransitRouteResult;
 import com.baidu.mapapi.search.route.WalkingRouteLine;
 import com.baidu.mapapi.search.route.WalkingRoutePlanOption;
 import com.baidu.mapapi.search.route.WalkingRouteResult;
+import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
+import com.baidu.mapapi.search.sug.SuggestionResult;
+import com.baidu.mapapi.search.sug.SuggestionSearch;
+import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListener,
-        OnGetRoutePlanResultListener {
+        OnGetRoutePlanResultListener, OnGetSuggestionResultListener {
 
     // 浏览路线节点相关
     Button mBtnPre = null; // 上一个节点
@@ -70,7 +81,14 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
     LocationClient mLocClient;
     boolean isFirstLoc = true;  //是否首次定位
     public MyLocationListenner myListener = new MyLocationListenner();
-    LatLng ll = null;
+
+    //POI相关,地点提示
+    private SuggestionSearch mSuggestionSearch = null;
+    private List<String> suggest;
+    private AutoCompleteTextView keyWorldsView1 = null;
+    private AutoCompleteTextView keyWorldsView2 = null;
+    private ArrayAdapter<String> sugAdapter = null;
+    private int loadIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +122,87 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         // 初始化搜索模块，注册事件监听
         mSearch = RoutePlanSearch.newInstance();
         mSearch.setOnGetRoutePlanResultListener(this);
+
+        //搜索提示相关初始化
+        mSuggestionSearch = SuggestionSearch.newInstance();
+        mSuggestionSearch.setOnGetSuggestionResultListener(this);
+        keyWorldsView1 = (AutoCompleteTextView) findViewById(R.id.start);
+        sugAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line);
+        keyWorldsView1.setAdapter(sugAdapter);
+        keyWorldsView1.setThreshold(1);
+
+        /**
+         * 当输入关键字变化时，动态更新建议列表
+         */
+        keyWorldsView1.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+                                      int arg3) {
+                if (cs.length() <= 0) {
+                    return;
+                }
+                String city = ((EditText) findViewById(R.id.city)).getText()
+                        .toString();
+                /**
+                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+                 */
+                mSuggestionSearch
+                        .requestSuggestion((new SuggestionSearchOption())
+                                .keyword(cs.toString()).city(city));
+            }
+        });
+
+        keyWorldsView2 = (AutoCompleteTextView) findViewById(R.id.end);
+        sugAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_dropdown_item_1line);
+        keyWorldsView2.setAdapter(sugAdapter);
+        keyWorldsView2.setThreshold(1);
+
+        /**
+         * 当输入关键字变化时，动态更新建议列表
+         */
+        keyWorldsView2.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1,
+                                          int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2,
+                                      int arg3) {
+                if (cs.length() <= 0) {
+                    return;
+                }
+                String city = ((EditText) findViewById(R.id.city)).getText()
+                        .toString();
+                /**
+                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
+                 */
+                mSuggestionSearch
+                        .requestSuggestion((new SuggestionSearchOption())
+                                .keyword(cs.toString()).city(city));
+            }
+        });
     }
 
     /**
@@ -118,11 +217,12 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         mBtnNext.setVisibility(View.INVISIBLE);
         mBaidumap.clear();
         // 处理搜索按钮响应
+        EditText editCt = (EditText) findViewById(R.id.city);
         EditText editSt = (EditText) findViewById(R.id.start);
         EditText editEn = (EditText) findViewById(R.id.end);
         // 设置起终点信息，对于tranist search 来说，城市名无意义
-        PlanNode stNode = PlanNode.withCityNameAndPlaceName("上海", editSt.getText().toString());
-        PlanNode enNode = PlanNode.withCityNameAndPlaceName("上海", editEn.getText().toString());
+        PlanNode stNode = PlanNode.withCityNameAndPlaceName(editCt.getText().toString(), editSt.getText().toString());
+        PlanNode enNode = PlanNode.withCityNameAndPlaceName(editCt.getText().toString(), editEn.getText().toString());
 
         // 实际使用中请对起点终点城市进行正确的设定
         if (v.getId() == R.id.drive) {
@@ -130,14 +230,14 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
                     .from(stNode).to(enNode));
         } else if (v.getId() == R.id.transit) {
             mSearch.transitSearch((new TransitRoutePlanOption())
-                    .from(stNode).city("上海").to(enNode));
+                    .from(stNode).city(editCt.getText().toString()).to(enNode));
         } else if (v.getId() == R.id.walk) {
             mSearch.walkingSearch((new WalkingRoutePlanOption())
                     .from(stNode).to(enNode));
-        } else if (v.getId() == R.id.bike) {
+        }/* else if (v.getId() == R.id.bike) {
             mSearch.bikingSearch((new BikingRoutePlanOption())
                     .from(stNode).to(enNode));
-        }
+        }*/
     }
 
     /**
@@ -257,7 +357,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            // result.getSuggestAddrInfo()
+               result.getSuggestAddrInfo();
             return;
         }
         if (result.error == SearchResult.ERRORNO.NO_ERROR) {
@@ -283,7 +383,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            // result.getSuggestAddrInfo()
+               result.getSuggestAddrInfo();
             return;
         }
         if (result.error == SearchResult.ERRORNO.NO_ERROR) {
@@ -307,7 +407,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         }
         if (result.error == SearchResult.ERRORNO.AMBIGUOUS_ROURE_ADDR) {
             // 起终点或途经点地址有岐义，通过以下接口获取建议查询信息
-            // result.getSuggestAddrInfo()
+               result.getSuggestAddrInfo();
             return;
         }
         if (result.error == SearchResult.ERRORNO.NO_ERROR) {
@@ -346,6 +446,23 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             overlay.addToMap();
             overlay.zoomToSpan();
         }
+    }
+
+    @Override
+    public void onGetSuggestionResult(SuggestionResult suggestionResult) {
+        if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
+            return;
+        }
+        suggest = new ArrayList<String>();
+        for (SuggestionResult.SuggestionInfo info : suggestionResult.getAllSuggestions()) {
+            if (info.key != null) {
+                suggest.add(info.key);
+            }
+        }
+        sugAdapter = new ArrayAdapter<String>(RoutePlanDemo.this, android.R.layout.simple_dropdown_item_1line, suggest);
+        keyWorldsView1.setAdapter(sugAdapter);
+        keyWorldsView2.setAdapter(sugAdapter);
+        sugAdapter.notifyDataSetChanged();
     }
 
     // 定制RouteOverly
@@ -493,7 +610,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             mBaidumap.setMyLocationData(locData);
             if (isFirstLoc) {
                 isFirstLoc = false;
-                ll = new LatLng(location.getLatitude(),
+                LatLng ll = new LatLng(location.getLatitude(),
                         location.getLongitude());
                 MapStatus.Builder builder = new MapStatus.Builder();
                 builder.target(ll).zoom(18.0f);

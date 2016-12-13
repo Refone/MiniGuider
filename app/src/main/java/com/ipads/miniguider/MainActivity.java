@@ -21,4 +21,10 @@ public class MainActivity extends AppCompatActivity {
         intent.setClass(MainActivity.this, RoutePlanDemo.class);
         startActivity(intent);
     }
+
+    public void onBusQuery(View view) {
+        Intent intent = new Intent();
+        intent.setClass(MainActivity.this, BusLineDemo.class);
+        startActivity(intent);
+    }
 }
