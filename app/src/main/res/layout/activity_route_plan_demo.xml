@@ -32,7 +32,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:text="龙泽" >
+                android:text="上海交通大学（闵行校区）" >
 
                 <requestFocus />
             </EditText>
@@ -55,7 +55,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:text="西单" >
+                android:text="上海交通大学（徐汇校区）" >
 
                 <requestFocus />
             </EditText>
@@ -137,8 +137,8 @@
                     android:layout_height="fill_parent"
                     android:layout_marginTop="10dip"
                     android:layout_weight="1.0"
-                    android:onClick="changeRouteIcon"
-                    android:text="自定义起终点图标" />
+                    android:onClick="changeTrafficEnable"
+                    android:text="开启实时路况" />
             </LinearLayout>
 
             <LinearLayout

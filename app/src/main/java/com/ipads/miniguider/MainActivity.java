@@ -20,6 +20,5 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, RoutePlanDemo.class);
         startActivity(intent);
-        finish();
     }
 }
