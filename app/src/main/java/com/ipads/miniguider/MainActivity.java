@@ -27,4 +27,10 @@ public class MainActivity extends AppCompatActivity {
         intent.setClass(MainActivity.this, BusLineDemo.class);
         startActivity(intent);
     }
+
+    public void onWeatherQuery(View view) {
+        Intent intent = new Intent();
+        intent.setClass(MainActivity.this, WeatherDemo.class);
+        startActivity(intent);
+    }
 }

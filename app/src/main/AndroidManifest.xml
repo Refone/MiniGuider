@@ -40,7 +40,8 @@
             android:enabled="true"
             android:process=":remote" />
 
-        <activity android:name=".BusLineDemo"></activity>
+        <activity android:name=".BusLineDemo" />
+        <activity android:name=".WeatherDemo"></activity>
     </application>
 
 </manifest>

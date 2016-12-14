@@ -400,6 +400,19 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         }
     }
 
+    private float getTaxiPrice(float dis) {
+        float price = 14;
+        if (dis > 10) {
+            price += (dis-10)*3.6 + (10-3)*2.4;
+        } else if (dis > 3) {
+            price += (dis-3)*2.4;
+        } else {
+            price += 0;
+        }
+
+        return price;
+    }
+
     @Override
     public void onGetDrivingRouteResult(DrivingRouteResult result) {
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
@@ -421,6 +434,10 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             overlay.setData(result.getRouteLines().get(0));
             overlay.addToMap();
             overlay.zoomToSpan();
+            float dis = route.getDistance()/1000;
+            Toast.makeText(RoutePlanDemo.this,
+                    "距离"+dis+"公里\n出租车费用:"+getTaxiPrice(dis)+"元",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
