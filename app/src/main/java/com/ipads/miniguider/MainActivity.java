@@ -33,4 +33,10 @@ public class MainActivity extends AppCompatActivity {
         intent.setClass(MainActivity.this, WeatherDemo.class);
         startActivity(intent);
     }
+
+    public void onCollection(View view) {
+        Intent intent = new Intent();
+        intent.setClass(MainActivity.this, CollectDemo.class);
+        startActivity(intent);
+    }
 }
