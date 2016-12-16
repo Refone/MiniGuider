@@ -30,7 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onWeatherQuery(View view) {
         Intent intent = new Intent();
-        intent.setClass(MainActivity.this, WeatherDemo.class);
+        intent.putExtra("city", "上海");
+        intent.setClass(MainActivity.this, SeeWeatherDemo.class);
         startActivity(intent);
     }
 

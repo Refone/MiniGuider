@@ -46,11 +46,14 @@
             android:process=":remote" />
 
         <activity android:name=".BusLineDemo" />
-        <activity android:name=".WeatherDemo" />
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login" />
-        <activity android:name=".CollectDemo"></activity>
+        <activity android:name=".CollectDemo" />
+        <activity
+            android:name=".SeeWeatherDemo"
+            android:label="@string/title_activity_see_weather_demo"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

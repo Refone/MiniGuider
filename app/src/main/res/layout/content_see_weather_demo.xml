@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.ipads.miniguider.SeeWeatherDemo"
+    tools:showIn="@layout/activity_see_weather_demo">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="请输入城市名称"
+            android:textSize="15dp"
+            android:visibility="invisible"/>
+
+        <include
+            android:id="@+id/today"
+            layout="@layout/item_weather"/>
+
+        <include
+            android:id="@+id/suggestion"
+            layout="@layout/item_suggestion"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/forecast_day0"
+                layout="@layout/item_forecast_line"/>
+            <include
+                android:id="@+id/forecast_day1"
+                layout="@layout/item_forecast_line"/>
+            <include
+                android:id="@+id/forecast_day2"
+                layout="@layout/item_forecast_line"/>
+            <include
+                android:id="@+id/forecast_day3"
+                layout="@layout/item_forecast_line"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
