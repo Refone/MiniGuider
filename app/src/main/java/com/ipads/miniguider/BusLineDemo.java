@@ -43,6 +43,10 @@ import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
 import com.service.HttpGetListener;
+import com.service.HttpPostData;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,8 +79,12 @@ public class BusLineDemo extends FragmentActivity implements
     private ArrayAdapter<String> sugAdapter = null;
     private int loadIndex = 0;
 
-    private String url ="http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Route";
-    
+    private String insertAPI ="http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Busline/";
+
+    boolean bSearched = false;
+    String mCity = null;
+    String mRoute = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,10 +173,10 @@ public class BusLineDemo extends FragmentActivity implements
         mBtnNext.setVisibility(View.INVISIBLE);
         EditText editCity = (EditText) findViewById(R.id.city);
         EditText editSearchKey = (EditText) findViewById(R.id.route);
+        mCity = editCity.getText().toString();
+        mRoute = editSearchKey.getText().toString();
         // 发起poi检索，从得到所有poi中找到公交线路类型的poi，再使用该poi的uid进行公交详情搜索
-        mSearch.searchInCity((new PoiCitySearchOption()).city(
-                editCity.getText().toString())
-                .keyword(editSearchKey.getText().toString()));
+        mSearch.searchInCity((new PoiCitySearchOption()).city(mCity).keyword(mRoute));
     }
 
     public void searchNextBusline(View v) {
@@ -236,6 +244,7 @@ public class BusLineDemo extends FragmentActivity implements
         if (busLineResult == null || busLineResult.error != SearchResult.ERRORNO.NO_ERROR) {
             Toast.makeText(BusLineDemo.this, "抱歉，未找到结果",
                     Toast.LENGTH_LONG).show();
+            bSearched = false;
             return;
         }
         mBaiduMap.clear();
@@ -247,8 +256,9 @@ public class BusLineDemo extends FragmentActivity implements
         overlay.zoomToSpan();
         mBtnPre.setVisibility(View.VISIBLE);
         mBtnNext.setVisibility(View.VISIBLE);
-        Toast.makeText(BusLineDemo.this, busLineResult.getBusLineName(),
-                Toast.LENGTH_SHORT).show();
+//        Toast.makeText(BusLineDemo.this, busLineResult.getBusLineName(), Toast.LENGTH_SHORT).show();
+        bSearched = true;
+
     }
 
     @Override
@@ -315,12 +325,36 @@ public class BusLineDemo extends FragmentActivity implements
     }
 
     public void onMark(View v) {
-
+        if (!bSearched) {
+            Toast.makeText(this, "尚未搜索线路", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        HttpPostData m = (HttpPostData) new HttpPostData(insertAPI,this);
+        m.push("username", "古六");
+        m.push("line", mRoute);
+        m.push("city", mCity);
+        m.execute();
     }
 
     @Override
     public void GetDataUrl(String data) {
+        boolean succ = false;
+        try {
+            JSONObject jb = new JSONObject(data);
+            if (jb.getString("username").equals("古六") &&
+                    jb.getString("line").equals(mRoute) &&
+                    jb.getString("city").equals(mCity)) {
+                succ = true;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
+        if (succ) {
+            Toast.makeText(this, "收藏成功", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "收藏失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
