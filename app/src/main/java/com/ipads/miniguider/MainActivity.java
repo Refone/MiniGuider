@@ -37,7 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void onCollection(View view) {
         Intent intent = new Intent();
-        intent.setClass(MainActivity.this, CollectDemo.class);
+        intent.putExtra("city","上海");
+        intent.putExtra("way","drive");
+        intent.putExtra("start","上海交通大学（闵行校区）");
+        intent.putExtra("end","上海交通大学（徐汇校区）");
+        intent.setClass(MainActivity.this, ShowRoute.class);
         startActivity(intent);
     }
 }
