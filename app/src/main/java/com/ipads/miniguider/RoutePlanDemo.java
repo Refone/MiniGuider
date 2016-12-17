@@ -53,12 +53,17 @@ import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
+import com.service.HttpGetListener;
+import com.service.HttpPostData;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListener,
-        OnGetRoutePlanResultListener, OnGetSuggestionResultListener {
+        OnGetRoutePlanResultListener, OnGetSuggestionResultListener,HttpGetListener {
 
     // 浏览路线节点相关
     Button mBtnPre = null; // 上一个节点
@@ -89,6 +94,13 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
     private AutoCompleteTextView keyWorldsView2 = null;
     private ArrayAdapter<String> sugAdapter = null;
     private int loadIndex = 0;
+
+    private String insertAPI = "http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Route";
+    private String mStart = null;
+    private String mEnd = null;
+    private String mWay = null;
+    private String mCity = null;
+    private boolean bSearched = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,18 +232,25 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         EditText editCt = (EditText) findViewById(R.id.city);
         EditText editSt = (EditText) findViewById(R.id.start);
         EditText editEn = (EditText) findViewById(R.id.end);
+        mCity = editCt.getText().toString();
+        mStart = editSt.getText().toString();
+        mEnd = editEn.getText().toString();
+
         // 设置起终点信息，对于tranist search 来说，城市名无意义
-        PlanNode stNode = PlanNode.withCityNameAndPlaceName(editCt.getText().toString(), editSt.getText().toString());
-        PlanNode enNode = PlanNode.withCityNameAndPlaceName(editCt.getText().toString(), editEn.getText().toString());
+        PlanNode stNode = PlanNode.withCityNameAndPlaceName(mCity, mStart);
+        PlanNode enNode = PlanNode.withCityNameAndPlaceName(mCity, mEnd);
 
         // 实际使用中请对起点终点城市进行正确的设定
         if (v.getId() == R.id.drive) {
+            mWay = "drive";
             mSearch.drivingSearch((new DrivingRoutePlanOption())
                     .from(stNode).to(enNode));
         } else if (v.getId() == R.id.transit) {
+            mWay = "busline";
             mSearch.transitSearch((new TransitRoutePlanOption())
                     .from(stNode).city(editCt.getText().toString()).to(enNode));
         } else if (v.getId() == R.id.walk) {
+            mWay = "walk";
             mSearch.walkingSearch((new WalkingRoutePlanOption())
                     .from(stNode).to(enNode));
         }/* else if (v.getId() == R.id.bike) {
@@ -352,6 +371,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
 
     @Override
     public void onGetWalkingRouteResult(WalkingRouteResult result) {
+        bSearched = false;
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
             Toast.makeText(RoutePlanDemo.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
@@ -371,13 +391,14 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             overlay.setData(result.getRouteLines().get(0));
             overlay.addToMap();
             overlay.zoomToSpan();
+            bSearched = true;
         }
 
     }
 
     @Override
     public void onGetTransitRouteResult(TransitRouteResult result) {
-
+        bSearched = false;
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
             Toast.makeText(RoutePlanDemo.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
@@ -397,6 +418,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             overlay.setData(result.getRouteLines().get(0));
             overlay.addToMap();
             overlay.zoomToSpan();
+            bSearched = true;
         }
     }
 
@@ -415,6 +437,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
 
     @Override
     public void onGetDrivingRouteResult(DrivingRouteResult result) {
+        bSearched = false;
         if (result == null || result.error != SearchResult.ERRORNO.NO_ERROR) {
             Toast.makeText(RoutePlanDemo.this, "抱歉，未找到结果", Toast.LENGTH_SHORT).show();
         }
@@ -438,6 +461,7 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
             Toast.makeText(RoutePlanDemo.this,
                     "距离"+dis+"公里\n出租车费用:"+getTaxiPrice(dis)+"元",
                     Toast.LENGTH_SHORT).show();
+            bSearched = true;
         }
     }
 
@@ -480,6 +504,46 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         keyWorldsView1.setAdapter(sugAdapter);
         keyWorldsView2.setAdapter(sugAdapter);
         sugAdapter.notifyDataSetChanged();
+    }
+
+    public void onMark(View v) {
+        if (!bSearched) {
+            Toast.makeText(this, "尚未搜索线路", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        HttpPostData m = (HttpPostData) new HttpPostData(insertAPI,this);
+        m.push("username", "古六");
+        m.push("start", mStart);
+        m.push("end", mEnd);
+        m.push("way", mWay);
+        m.push("city", mCity);
+        m.execute();
+    }
+
+    @Override
+    public void GetDataUrl(String data) {
+        boolean succ = false;
+
+        try {
+            JSONObject jb = new JSONObject(data);
+            if (jb.getString("username").equals("古六") &&
+                    jb.getString("start").equals(mStart) &&
+                    jb.getString("end").equals(mEnd) &&
+                    jb.getString("city").equals(mCity) &&
+                    jb.getString("way").equals(mWay)) {
+                succ = true;
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (succ) {
+            Toast.makeText(this, "收藏成功", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "收藏失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     // 定制RouteOverly
@@ -608,9 +672,6 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         super.onDestroy();
     }
 
-    public void onMark(View v) {
-        Toast.makeText(this, "BOOM!!", Toast.LENGTH_SHORT).show();
-    }
     /**
      * 定位SDK监听函数
      */

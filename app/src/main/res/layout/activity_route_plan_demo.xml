@@ -100,7 +100,7 @@
                 android:layout_marginRight="2dip"
                 android:layout_weight="1.0"
                 android:onClick="searchButtonProcess"
-                android:text="驾车搜索" />
+                android:text="驾车" />
 
             <Button
                 android:id="@+id/transit"
@@ -110,7 +110,7 @@
                 android:layout_marginRight="2dip"
                 android:layout_weight="1.0"
                 android:onClick="searchButtonProcess"
-                android:text="公交搜索" />
+                android:text="公交" />
 
             <Button
                 android:id="@+id/walk"
@@ -120,7 +120,7 @@
                 android:layout_marginRight="2dip"
                 android:layout_weight="1.0"
                 android:onClick="searchButtonProcess"
-                android:text="步行搜索" />
+                android:text="步行" />
             <Button
                 android:id="@+id/mark"
                 android:layout_width="fill_parent"

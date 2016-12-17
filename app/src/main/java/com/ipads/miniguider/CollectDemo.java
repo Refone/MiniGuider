@@ -31,8 +31,8 @@ import static android.R.id.list;
 
 public class CollectDemo extends Activity implements OnClickListener, HttpGetListener{
 
-    private static final String url0 = "http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Route/?Route.username=李四";
-    private static final String url1 = "http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Busline/?Busline.username=李四";
+    private static final String url0 = "http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Route/?Route.username=古六";
+    private static final String url1 = "http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Busline/?Busline.username=古六";
     private static final  int VIEW_CNT = 2;
 
     private List<List<Map<String, Object>>> mData = new ArrayList<List<Map<String, Object>>>(VIEW_CNT);
@@ -55,6 +55,10 @@ public class CollectDemo extends Activity implements OnClickListener, HttpGetLis
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_colllect);
+
+        for(int i = 0; i < VIEW_CNT; ++i){
+            mData.add(new ArrayList<Map<String, Object>>());
+        }
 
         initView();
         initData();
@@ -276,12 +280,13 @@ public class CollectDemo extends Activity implements OnClickListener, HttpGetLis
     public void GetDataUrl(String data){
         //从RMP返回的数据
         System.out.println(data);
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        int curmode = 1;
+        List<Map<String, Object>> list;
+        //int curmode = 1;
         try{
             JSONObject json = new JSONObject(data);
             // 0: 路线规划
             if(!json.optString("Route").equals("")) {
+                list = mData.get(0);
                 JSONArray route = json.getJSONArray("Route");
                 //System.out.println("the length is " + route.length());
                 for(int i = 0; i < route.length(); ++i){
@@ -290,14 +295,13 @@ public class CollectDemo extends Activity implements OnClickListener, HttpGetLis
                             + delim2 + ele.getString("way");
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("img", R.drawable.route);
-                    map.put("title", /*ele.getString("city")*/"上海");
+                    map.put("title", ele.getString("city"));
                     map.put("info", ele_str);
                     list.add(map);
                 }
                 //curmode = 0;
                 CornerListView listvw = (CornerListView) views.get(0).findViewById(R.id.setting_list);
                 listvw.setAdapter(new MyAdapter(this, list, R.layout.listview_item));
-                mData.add(0, list);
                 listvw.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
                     @Override
@@ -328,6 +332,7 @@ public class CollectDemo extends Activity implements OnClickListener, HttpGetLis
 
                 });
             }else if(!json.optString("Busline").equals("")) {// 1: 公交线路
+                list = mData.get(1);
                 JSONArray route = json.getJSONArray("Busline");
                 //System.out.println("the length is " + route.length());
                 for (int i = 0; i < route.length(); ++i) {
@@ -342,7 +347,7 @@ public class CollectDemo extends Activity implements OnClickListener, HttpGetLis
                 //curmode = 1;
                 CornerListView listvw = (CornerListView) views.get(1).findViewById(R.id.setting_list);
                 listvw.setAdapter(new MyAdapter(this, list, R.layout.listview_item));
-                mData.add(1, list);
+                //mData.set(1, list);
                 listvw.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 
                     @Override
