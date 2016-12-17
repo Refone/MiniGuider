@@ -121,15 +121,15 @@
                 android:layout_weight="1.0"
                 android:onClick="searchButtonProcess"
                 android:text="步行搜索" />
-            <!--Button
-                android:id="@+id/bike"
+            <Button
+                android:id="@+id/mark"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_marginLeft="2dip"
                 android:layout_marginRight="2dip"
                 android:layout_weight="1.0"
-                android:onClick="searchButtonProcess"
-                android:text="骑行搜索" /-->
+                android:onClick="onMark"
+                android:text="收藏" />
         </LinearLayout>
 
         <RelativeLayout
@@ -162,6 +162,7 @@
                     android:layout_weight="1.0"
                     android:onClick="changeTrafficEnable"
                     android:text="开启实时路况" />
+
             </LinearLayout>
 
             <LinearLayout

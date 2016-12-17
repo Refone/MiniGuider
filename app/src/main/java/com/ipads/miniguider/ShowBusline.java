@@ -1,15 +1,10 @@
 package com.ipads.miniguider;
 
-import android.support.v4.app.FragmentActivity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +19,6 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
-import com.baidu.mapapi.map.SupportMapFragment;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.overlayutil.BusLineOverlay;
 import com.baidu.mapapi.search.busline.BusLineResult;
@@ -38,18 +32,13 @@ import com.baidu.mapapi.search.poi.PoiCitySearchOption;
 import com.baidu.mapapi.search.poi.PoiDetailResult;
 import com.baidu.mapapi.search.poi.PoiResult;
 import com.baidu.mapapi.search.poi.PoiSearch;
-import com.baidu.mapapi.search.sug.OnGetSuggestionResultListener;
-import com.baidu.mapapi.search.sug.SuggestionResult;
-import com.baidu.mapapi.search.sug.SuggestionSearch;
-import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-import com.service.HttpGetListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BusLineDemo extends FragmentActivity implements
+public class ShowBusline extends AppCompatActivity implements
         OnGetPoiSearchResultListener, OnGetBusLineSearchResultListener,
-        BaiduMap.OnMapClickListener, OnGetSuggestionResultListener, HttpGetListener {
+        BaiduMap.OnMapClickListener{
 
     private Button mBtnPre = null; // 上一个节点
     private Button mBtnNext = null; // 下一个节点
@@ -69,26 +58,25 @@ public class BusLineDemo extends FragmentActivity implements
     boolean isFirstLoc = true;  //是否首次定位
     public MyLocationListenner myListener = new MyLocationListenner();
 
-    private SuggestionSearch mSuggestionSearch = null;
-    private List<String> suggest;
-    private AutoCompleteTextView keyWorldsView = null;
-    private ArrayAdapter<String> sugAdapter = null;
-    private int loadIndex = 0;
+    String city = null;
+    String busline = null;
 
-    private String url ="http://112.74.49.183:8080/Entity/U64afbe41b0739/GpsPro/Route";
-    
+    TextView t = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bus_line_demo);
+        setContentView(R.layout.activity_show_busline);
 
-        CharSequence titleLable = "公交线路查询功能";
-        setTitle(titleLable);
+        Intent intent = getIntent();
+        city = intent.getStringExtra("city");
+        busline = intent.getStringExtra("busline");
+
         mBtnPre = (Button) findViewById(R.id.pre);
         mBtnNext = (Button) findViewById(R.id.next);
         mBtnPre.setVisibility(View.INVISIBLE);
         mBtnNext.setVisibility(View.INVISIBLE);
-        mMapView = (MapView) findViewById(R.id.bmapView);
+        mMapView = (MapView) findViewById(R.id.map);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setOnMapClickListener(this);
         mSearch = PoiSearch.newInstance();
@@ -99,6 +87,7 @@ public class BusLineDemo extends FragmentActivity implements
         overlay = new BusLineOverlay(mBaiduMap);
         mBaiduMap.setOnMarkerClickListener(overlay);
 
+        /*
         //开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
         //定位初始化
@@ -110,65 +99,38 @@ public class BusLineDemo extends FragmentActivity implements
         option.setScanSpan(1000);
         mLocClient.setLocOption(option);
         mLocClient.start();
+        */
+        
+        t = (TextView)findViewById(R.id.busline_show_line);
+        t.setText(adapter(busline));
 
-        mSuggestionSearch = SuggestionSearch.newInstance();
-        mSuggestionSearch.setOnGetSuggestionResultListener(this);
-        keyWorldsView = (AutoCompleteTextView) findViewById(R.id.route);
-        sugAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_dropdown_item_1line);
-        keyWorldsView.setAdapter(sugAdapter);
-        keyWorldsView.setThreshold(1);
-
-        /**
-         * 当输入关键字变化时，动态更新建议列表
-         */
-        keyWorldsView.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1,
-                                          int arg2, int arg3) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2,
-                                      int arg3) {
-                if (cs.length() <= 0) {
-                    return;
-                }
-                String city = ((EditText) findViewById(R.id.city)).getText()
-                        .toString();
-                /**
-                 * 使用建议搜索服务获取建议列表，结果在onSuggestionResult()中更新
-                 */
-                mSuggestionSearch
-                        .requestSuggestion((new SuggestionSearchOption())
-                                .keyword(cs.toString()).city(city));
-            }
-        });
-    }
-
-    /**
-     * 发起检索
-     *
-     * @param v
-     */
-    public void searchButtonProcess(View v) {
         busLineIDList.clear();
         busLineIndex = 0;
         mBtnPre.setVisibility(View.INVISIBLE);
         mBtnNext.setVisibility(View.INVISIBLE);
-        EditText editCity = (EditText) findViewById(R.id.city);
-        EditText editSearchKey = (EditText) findViewById(R.id.route);
         // 发起poi检索，从得到所有poi中找到公交线路类型的poi，再使用该poi的uid进行公交详情搜索
         mSearch.searchInCity((new PoiCitySearchOption()).city(
-                editCity.getText().toString())
-                .keyword(editSearchKey.getText().toString()));
+                city)
+                .keyword(busline));
+    }
+
+    private String adapter(String line){
+        String pattern = "(\\d+)";
+        if (line.matches(pattern)) {
+            return line+"路公交车";
+        } else {
+            return line;
+        }
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
+
+    @Override
+    public boolean onMapPoiClick(MapPoi mapPoi) {
+        return false;
     }
 
     public void searchNextBusline(View v) {
@@ -178,63 +140,17 @@ public class BusLineDemo extends FragmentActivity implements
         if (busLineIndex >= 0 && busLineIndex < busLineIDList.size()
                 && busLineIDList.size() > 0) {
             mBusLineSearch.searchBusLine((new BusLineSearchOption()
-                    .city(((EditText) findViewById(R.id.city)).getText()
-                            .toString()).uid(busLineIDList.get(busLineIndex))));
+                    .city(city).uid(busLineIDList.get(busLineIndex))));
 
             busLineIndex++;
         }
 
     }
 
-    /**
-     * 节点浏览示例
-     *
-     * @param v
-     */
-    public void nodeClick(View v) {
-
-        if (nodeIndex < -1 || route == null
-                || nodeIndex >= route.getStations().size()) {
-            return;
-        }
-        TextView popupText = new TextView(this);
-        popupText.setBackgroundResource(R.drawable.popup);
-        popupText.setTextColor(0xff000000);
-        // 上一个节点
-        if (mBtnPre.equals(v) && nodeIndex > 0) {
-            // 索引减
-            nodeIndex--;
-        }
-        // 下一个节点
-        if (mBtnNext.equals(v) && nodeIndex < (route.getStations().size() - 1)) {
-            // 索引加
-            nodeIndex++;
-        }
-        if (nodeIndex >= 0) {
-            // 移动到指定索引的坐标
-            mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(route
-                    .getStations().get(nodeIndex).getLocation()));
-            // 弹出泡泡
-            popupText.setText(route.getStations().get(nodeIndex).getTitle());
-            mBaiduMap.showInfoWindow(new InfoWindow(popupText, route.getStations()
-                    .get(nodeIndex).getLocation(), 0));
-        }
-    }
-
-    @Override
-    public void onMapClick(LatLng latLng) {
-        mBaiduMap.hideInfoWindow();
-    }
-
-    @Override
-    public boolean onMapPoiClick(MapPoi mapPoi) {
-        return false;
-    }
-
     @Override
     public void onGetBusLineResult(BusLineResult busLineResult) {
         if (busLineResult == null || busLineResult.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(BusLineDemo.this, "抱歉，未找到结果",
+            Toast.makeText(ShowBusline.this, "抱歉，未找到结果",
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -247,14 +163,14 @@ public class BusLineDemo extends FragmentActivity implements
         overlay.zoomToSpan();
         mBtnPre.setVisibility(View.VISIBLE);
         mBtnNext.setVisibility(View.VISIBLE);
-        Toast.makeText(BusLineDemo.this, busLineResult.getBusLineName(),
+        Toast.makeText(ShowBusline.this, busLineResult.getBusLineName(),
                 Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onGetPoiResult(PoiResult poiResult) {
         if (poiResult == null || poiResult.error != SearchResult.ERRORNO.NO_ERROR) {
-            Toast.makeText(BusLineDemo.this, "抱歉，未找到结果",
+            Toast.makeText(ShowBusline.this, "抱歉，未找到结果",
                     Toast.LENGTH_LONG).show();
             return;
         }
@@ -292,35 +208,39 @@ public class BusLineDemo extends FragmentActivity implements
         super.onDestroy();
     }
 
-    public boolean isBusName(String s) {
-        String pattern = "(\\D*)(\\d+)路";
-        s = s.replace(" ", "");
-        return s.matches(pattern);
-    }
+    /**
+     * 节点浏览示例
+     *
+     * @param v
+     */
+    public void nodeClick(View v) {
 
-    @Override
-    public void onGetSuggestionResult(SuggestionResult suggestionResult) {
-        if (suggestionResult == null || suggestionResult.getAllSuggestions() == null) {
+        if (nodeIndex < -1 || route == null
+                || nodeIndex >= route.getStations().size()) {
             return;
         }
-        suggest = new ArrayList<String>();
-        for (SuggestionResult.SuggestionInfo info : suggestionResult.getAllSuggestions()) {
-            if (info.key != null && isBusName(info.key)) {
-                suggest.add(info.key);
-            }
+        TextView popupText = new TextView(this);
+        popupText.setBackgroundResource(R.drawable.popup);
+        popupText.setTextColor(0xff000000);
+        // 上一个节点
+        if (mBtnPre.equals(v) && nodeIndex > 0) {
+            // 索引减
+            nodeIndex--;
         }
-        sugAdapter = new ArrayAdapter<String>(BusLineDemo.this, android.R.layout.simple_dropdown_item_1line, suggest);
-        keyWorldsView.setAdapter(sugAdapter);
-        sugAdapter.notifyDataSetChanged();
-    }
-
-    public void onMark(View v) {
-
-    }
-
-    @Override
-    public void GetDataUrl(String data) {
-
+        // 下一个节点
+        if (mBtnNext.equals(v) && nodeIndex < (route.getStations().size() - 1)) {
+            // 索引加
+            nodeIndex++;
+        }
+        if (nodeIndex >= 0) {
+            // 移动到指定索引的坐标
+            mBaiduMap.setMapStatus(MapStatusUpdateFactory.newLatLng(route
+                    .getStations().get(nodeIndex).getLocation()));
+            // 弹出泡泡
+            popupText.setText(route.getStations().get(nodeIndex).getTitle());
+            mBaiduMap.showInfoWindow(new InfoWindow(popupText, route.getStations()
+                    .get(nodeIndex).getLocation(), 0));
+        }
     }
 
     /**

@@ -54,7 +54,8 @@
             android:name=".SeeWeatherDemo"
             android:label="@string/title_activity_see_weather_demo"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ShowRoute"></activity>
+        <activity android:name=".ShowRoute" />
+        <activity android:name=".ShowBusline"></activity>
     </application>
 
 </manifest>

@@ -608,6 +608,9 @@ public class RoutePlanDemo extends Activity implements BaiduMap.OnMapClickListen
         super.onDestroy();
     }
 
+    public void onMark(View v) {
+        Toast.makeText(this, "BOOM!!", Toast.LENGTH_SHORT).show();
+    }
     /**
      * 定位SDK监听函数
      */
